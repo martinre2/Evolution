@@ -1,4 +1,4 @@
-package Generation
+package Board
 
 import (
 	c "github.com/martinre2/Evolution/Conformation"

@@ -1,11 +1,11 @@
 package Stage
 
 import (
+	"fmt"
 	b "github.com/martinre2/Evolution/Board"
 	cf "github.com/martinre2/Evolution/CoupleFormation"
+	gn "github.com/martinre2/Evolution/Generation"
 	s "github.com/martinre2/Evolution/Selection"
-	//gn "github.com/martinre2/Evolution/Generate"
-	"fmt"
 )
 
 type SimpleGenerationStage struct {
@@ -37,9 +37,9 @@ func (r SimpleGenerationStage) runV1() bool {
 
 	fmt.Println("SimpleGen>", numGene)
 	for i := 0; i < numGene; i++ {
-		fmt.Println("SimpleGen>", i)
+		fmt.Println("SimpleGen --- >", i)
 		if operSel == 0 {
-			if new(s.Roulette).Roulette(r.board.Generations[i], r.board) {
+			if new(s.Roulette).Roulette(&r.board.Generations[i], r.board) {
 				return false
 			}
 		} else if operSel == 1 {
@@ -58,15 +58,18 @@ func (r SimpleGenerationStage) runV1() bool {
 			//}
 		}
 
-		new(cf.SimplexCoupleFormation).CoupleFormation(r.board.Generations[i], r.board)
-		fmt.Println("PARENTS GEN", r.board.Generations[i].ParentsLst)
+		fmt.Println("After Simplex", r.board.Generations[i].Selection)
+		new(cf.SimplexCoupleFormation).CoupleFormation(&r.board.Generations[i], r.board)
 
-		if r.board.getLatticeType() == 0 {
+		fmt.Println("Parents Len", len(r.board.Generations[i].ParentsLst))
+		fmt.Println("Parents Len", r.board.Generations[i].ParentsLst)
+
+		if r.board.Params.LatticeType == 0 {
 			//r.board.Generations = append(r.board.Generations, null)
-		} else if r.board.getLatticeType() == 1 {
+		} else if r.board.Params.LatticeType == 1 {
 			//r.board.Generations = append(r.board.Generations, null)
-		} else if r.board.getLatticeType() == 2 {
-			r.board.Generations = append(r.board.Generations, new(MakeCubeChildren).MakeChildren(r.board.Generations[i], r.board))
+		} else if r.board.Params.LatticeType == 2 {
+			r.board.Generations = append(r.board.Generations, new(gn.MakeCubeChildren).MakeChildren(r.board.Generations[i], r.board))
 			//r.board.getProjLvl().getExperiment(actExp).add(new MakeCubeChildren().makeChildren(r.board.getProjLvl().getExperiment(actExp).get(i)));
 		}
 		/*

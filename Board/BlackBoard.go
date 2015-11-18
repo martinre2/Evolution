@@ -3,7 +3,6 @@ package Board
 import (
 	"fmt"
 	c "github.com/martinre2/Evolution/Conformation"
-	g "github.com/martinre2/Evolution/Generation"
 )
 
 type BlackBoardParameters struct {
@@ -32,7 +31,7 @@ type BlackBoardParameters struct {
 type BlackBoard struct {
 	Params      BlackBoardParameters
 	Hplevel     HPLevel
-	Generations []g.Generation
+	Generations []Generation
 	Bests       []c.Conformation
 }
 
@@ -43,9 +42,9 @@ func NewBoard(parameters BlackBoardParameters) *BlackBoard {
 	return board
 }
 
-func (b *BlackBoard) IsAvailable(puntosHijo []c.Point, puntosHijo_C []c.Point, x float32, y float32, z float32) bool {
+func (b *BlackBoard) IsAvailable(puntosHijo *[]c.Point, puntosHijo_C []c.Point, x float32, y float32, z float32) bool {
 
-	for _, p := range puntosHijo {
+	for _, p := range *puntosHijo {
 		if p.XValue == x && p.YValue == y && p.ZValue == z {
 			return false
 		}
@@ -78,6 +77,5 @@ func (b *BlackBoard) GenRadioGiroP(conformations []c.Conformation) float64 {
 }
 
 func (b *BlackBoard) AddBest(conformation c.Conformation) {
-	fmt.Println("ADD", conformation)
 	b.Bests = append(b.Bests, conformation)
 }

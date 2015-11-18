@@ -13,6 +13,7 @@ func main() {
 		NumGenerations:   100,
 		NumExperiments:   1,
 		OtherTechs:       []int{1, 0, 0},
+		CrossOverProb:    1.0,
 	}
 
 	board := b.NewBoard(params)
@@ -21,8 +22,10 @@ func main() {
 	ex_randomStage := new(r.RandomGenerationStage).Execute(board)
 	ex_simpleStage := new(r.SimpleGenerationStage).Execute(board)
 
-	fmt.Println("Test drive")
-	fmt.Println(board)
+	_ = board
+	_ = ex_randomStage
+	_ = ex_simpleStage
+	fmt.Println(len(board.Generations))
 	fmt.Println(ex_randomStage)
 	fmt.Println(ex_simpleStage)
 }

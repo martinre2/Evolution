@@ -7,7 +7,7 @@ import (
 type Conformation struct {
 	Fitness       int
 	Conformations []Point
-	Parents       []Parents
+	Parents       Parents
 	RadioGiroCM   [3]float64
 	RadioGiroRCDM float64
 	Dmax          float64

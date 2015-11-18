@@ -4,20 +4,18 @@ import (
 	"fmt"
 	b "github.com/martinre2/Evolution/Board"
 	c "github.com/martinre2/Evolution/Conformation"
-	g "github.com/martinre2/Evolution/Generation"
 	"math/rand"
 	"sort"
 )
 
 type Roulette struct{}
 
-func (r Roulette) Roulette(generation g.Generation, board *b.BlackBoard) bool {
+func (r Roulette) Roulette(generation *b.Generation, board *b.BlackBoard) bool {
 
-	fmt.Println("Gen", generation)
+	//fmt.Println("Gen", generation)
 	var ln int = len(generation.Conformations)
 	var totalFitness int = 0
 	for i := 0; i < ln; i++ {
-		fmt.Println("G", i, generation.Conformations[i].Fitness)
 		totalFitness += generation.Conformations[i].Fitness
 	}
 
@@ -37,11 +35,11 @@ func (r Roulette) Roulette(generation g.Generation, board *b.BlackBoard) bool {
 		copy(dest, generation.Conformations)
 
 		sort.Sort(dest)
-		fmt.Println("____>>dest", dest[0])
+		//fmt.Println("____>>dest", dest[0])
 		board.AddBest(dest[0])
 		board.AddBest(dest[1])
 
-		fmt.Println("BOARD", board.Bests)
+		//fmt.Println("BOARD", board.Bests)
 
 		dest = dest[:0]
 
@@ -61,7 +59,6 @@ func (r Roulette) Roulette(generation g.Generation, board *b.BlackBoard) bool {
 				}
 			}
 		}
-		fmt.Println("SELECCION")
 	} else if board.Params.OtherTechs[0] == 2 {
 		/*ArrayList<Conformation> dest = (ArrayList<Conformation>) generation.getConformations().clone();
 		board.Params.ordenar(dest);
@@ -101,7 +98,8 @@ func (r Roulette) Roulette(generation g.Generation, board *b.BlackBoard) bool {
 		}*/
 	}
 	sort.Ints(seleccion)
-	generation.Selection = seleccion
+	generation.Selection = make([]int, len(seleccion))
+	copy(generation.Selection, seleccion)
 	return false
 }
 

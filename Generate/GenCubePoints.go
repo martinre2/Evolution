@@ -5,7 +5,6 @@ import (
 	b "github.com/martinre2/Evolution/Board"
 	c "github.com/martinre2/Evolution/Conformation"
 	f "github.com/martinre2/Evolution/Fitness"
-	gn "github.com/martinre2/Evolution/Generation"
 	"math/rand"
 	"strings"
 )
@@ -26,7 +25,7 @@ func NewGenCubePoints(board *b.BlackBoard) *GenCubePoints {
 	return genRdm
 }
 
-func (g *GenCubePoints) Generate(number int) gn.Generation {
+func (g *GenCubePoints) Generate(number int) b.Generation {
 	var conformaciones []c.Conformation
 	fmt.Println("Conformations Generator", number)
 	for i := 0; i < number; i++ {
@@ -52,7 +51,7 @@ func (g *GenCubePoints) Generate(number int) gn.Generation {
 		conformaciones = append(conformaciones, conf)
 	}
 
-	rGn := gn.Generation{
+	rGn := b.Generation{
 		Conformations: conformaciones,
 		DmaxP:         g.board.GenDmaxP(conformaciones),
 		RadioGiroP:    g.board.GenRadioGiroP(conformaciones),
@@ -92,7 +91,7 @@ func (g *GenCubePoints) doPoints(pointsHijo_C []c.Point, i int) int {
 		case 0:
 
 			if g.Points[i-1].Way0 &&
-				g.board.IsAvailable(g.Points, pointsHijo_C, g.Points[i-1].XValue+1, g.Points[i-1].YValue, g.Points[i-1].ZValue) {
+				g.board.IsAvailable(&g.Points, pointsHijo_C, g.Points[i-1].XValue+1, g.Points[i-1].YValue, g.Points[i-1].ZValue) {
 				g.Points = append(g.Points, g.genPtoCubico(0, g.HPsec[i], g.Points[i-1]))
 				isOk = true
 			} else {
@@ -102,8 +101,8 @@ func (g *GenCubePoints) doPoints(pointsHijo_C []c.Point, i int) int {
 			break
 
 		case 1:
-			if g.Points[i-1].Way0 &&
-				g.board.IsAvailable(g.Points, pointsHijo_C, g.Points[i-1].XValue+1, g.Points[i-1].YValue, g.Points[i-1].ZValue) {
+			if g.Points[i-1].Way1 &&
+				g.board.IsAvailable(&g.Points, pointsHijo_C, g.Points[i-1].XValue+1, g.Points[i-1].YValue, g.Points[i-1].ZValue) {
 				g.Points = append(g.Points, g.genPtoCubico(1, g.HPsec[i], g.Points[i-1]))
 				isOk = true
 			} else {
@@ -113,8 +112,8 @@ func (g *GenCubePoints) doPoints(pointsHijo_C []c.Point, i int) int {
 			break
 		case 2:
 
-			if g.Points[i-1].Way0 &&
-				g.board.IsAvailable(g.Points, pointsHijo_C, g.Points[i-1].XValue+1, g.Points[i-1].YValue, g.Points[i-1].ZValue) {
+			if g.Points[i-1].Way2 &&
+				g.board.IsAvailable(&g.Points, pointsHijo_C, g.Points[i-1].XValue+1, g.Points[i-1].YValue, g.Points[i-1].ZValue) {
 				g.Points = append(g.Points, g.genPtoCubico(2, g.HPsec[i], g.Points[i-1]))
 				isOk = true
 			} else {
@@ -124,8 +123,8 @@ func (g *GenCubePoints) doPoints(pointsHijo_C []c.Point, i int) int {
 			break
 		case 3:
 
-			if g.Points[i-1].Way0 &&
-				g.board.IsAvailable(g.Points, pointsHijo_C, g.Points[i-1].XValue+1, g.Points[i-1].YValue, g.Points[i-1].ZValue) {
+			if g.Points[i-1].Way3 &&
+				g.board.IsAvailable(&g.Points, pointsHijo_C, g.Points[i-1].XValue+1, g.Points[i-1].YValue, g.Points[i-1].ZValue) {
 				g.Points = append(g.Points, g.genPtoCubico(3, g.HPsec[i], g.Points[i-1]))
 				isOk = true
 			} else {
@@ -136,8 +135,8 @@ func (g *GenCubePoints) doPoints(pointsHijo_C []c.Point, i int) int {
 
 		case 4:
 
-			if g.Points[i-1].Way0 &&
-				g.board.IsAvailable(g.Points, pointsHijo_C, g.Points[i-1].XValue+1, g.Points[i-1].YValue, g.Points[i-1].ZValue) {
+			if g.Points[i-1].Way4 &&
+				g.board.IsAvailable(&g.Points, pointsHijo_C, g.Points[i-1].XValue+1, g.Points[i-1].YValue, g.Points[i-1].ZValue) {
 				g.Points = append(g.Points, g.genPtoCubico(4, g.HPsec[i], g.Points[i-1]))
 				isOk = true
 			} else {
@@ -147,8 +146,8 @@ func (g *GenCubePoints) doPoints(pointsHijo_C []c.Point, i int) int {
 			break
 
 		case 5:
-			if g.Points[i-1].Way0 &&
-				g.board.IsAvailable(g.Points, pointsHijo_C, g.Points[i-1].XValue+1, g.Points[i-1].YValue, g.Points[i-1].ZValue) {
+			if g.Points[i-1].Way5 &&
+				g.board.IsAvailable(&g.Points, pointsHijo_C, g.Points[i-1].XValue+1, g.Points[i-1].YValue, g.Points[i-1].ZValue) {
 				g.Points = append(g.Points, g.genPtoCubico(5, g.HPsec[i], g.Points[i-1]))
 				isOk = true
 			} else {

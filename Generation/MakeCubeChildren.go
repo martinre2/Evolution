@@ -2,27 +2,32 @@ package Generation
 
 import (
 	"fmt"
-	//b "github.com/martinre2/Evolution/Board"
+	b "github.com/martinre2/Evolution/Board"
 	c "github.com/martinre2/Evolution/Conformation"
-	g "github.com/martinre2/Evolution/Generation"
-	//co "github.com/martinre2/Evolution/Operator"
+	f "github.com/martinre2/Evolution/Fitness"
 	"math/rand"
-	"sort"
+	_ "sort"
+	"strings"
 )
 
-type MakeCubeChildren struct{}
+type MakeCubeChildren struct {
+	board *b.BlackBoard
+}
 
-func (mc MakeCubeChildren) makeChildren(gen g.Generation, board *b.BlackBoard) g.Generation {
+func (mc MakeCubeChildren) MakeChildren(gen b.Generation, board *b.BlackBoard) b.Generation {
+	mc.board = board
 	var length int = len(board.Hplevel.HpString)
 	var numConf int = len(gen.ParentsLst)
 
-	var conf []Conformation
+	fmt.Println("MC>", length, numConf)
+
+	var conf []c.Conformation
 	var corte []int
 
-	cOver := new(co.CrossOver)
+	cOver := NewCrossOver(board)
 
 	for i := 0; i < numConf; i++ {
-		var tempP []Parents
+		var tempP c.Parents
 
 		if board.Params.CrossOverOp == 0 {
 			corte = cOver.OnePointCrossOver(length)
@@ -34,20 +39,20 @@ func (mc MakeCubeChildren) makeChildren(gen g.Generation, board *b.BlackBoard) g
 		var padre1 int = 0
 		var padre2 int = 0
 
-		if board.Params.MutationOp() == 0 {
-			padre1 = gen.PrarentsLst[i].Parent1
-			padre2 = gen.PrarentsLst[i].Parent2
-			tempP = gen.PrarentsLst[i]
+		if board.Params.MutationOp == 0 {
+			padre1 = gen.ParentsLst[i].Parent1
+			padre2 = gen.ParentsLst[i].Parent2
+			tempP = gen.ParentsLst[i]
 		} else {
 			switch rand.Intn(2) {
 			case 0:
-				padre1 = gen.PrarentsLst[i].Parent1
-				padre2 = gen.PrarentsLst[i].Parent2
-				tempP = gen.PrarentsLst[i]
+				padre1 = gen.ParentsLst[i].Parent1
+				padre2 = gen.ParentsLst[i].Parent2
+				tempP = gen.ParentsLst[i]
 				break
 			case 1:
-				padre1 = gen.PrarentsLst[i].Parent2
-				padre2 = gen.PrarentsLst[i].Parent1
+				padre1 = gen.ParentsLst[i].Parent2
+				padre2 = gen.ParentsLst[i].Parent1
 				tempP.Parent1 = padre1
 				tempP.Parent2 = padre2
 				break
@@ -64,14 +69,15 @@ func (mc MakeCubeChildren) makeChildren(gen g.Generation, board *b.BlackBoard) g
 		puntosPadre2 = make([]c.Point, len(gen.Conformations[padre2].Conformations))
 		copy(puntosPadre2, gen.Conformations[padre2].Conformations)
 
-		var nuevoHijo1 []Point
-		var nuevoHijo2 []Point
+		var nuevoHijo1 []c.Point
+		var nuevoHijo2 []c.Point
 
 		for m := 0; m < length; m++ {
 			puntosPadre1[m].ResetR()
 			puntosPadre2[m].ResetR()
 		}
-		var puntosHijo_C []Point
+
+		var puntosHijo_C []c.Point
 
 		fP := c.Point{
 			XValue:       0.0,
@@ -91,13 +97,14 @@ func (mc MakeCubeChildren) makeChildren(gen g.Generation, board *b.BlackBoard) g
 
 		if board.Params.CrossOverOp == 0 {
 			for j := 1; j < length; j++ {
+				fmt.Println(" It j", j)
 				if j < corte[0] {
-					j = mc.check(puntosHijo_C, puntosPadre1[j].MovVectValue(), nuevoHijo1, j)
+					j = mc.check(puntosHijo_C, puntosPadre1[j].MovVectValue, &nuevoHijo1, j)
 				} else {
-					j = mc.check(puntosHijo_C, puntosPadre2[j].MovVectValue(), nuevoHijo1, j)
+					j = mc.check(puntosHijo_C, puntosPadre2[j].MovVectValue, &nuevoHijo1, j)
 				}
 			}
-			var puntosHijo_C []Point
+			var puntosHijo_C []c.Point
 
 			c2 := c.Point{
 				XValue:       0.0,
@@ -116,23 +123,23 @@ func (mc MakeCubeChildren) makeChildren(gen g.Generation, board *b.BlackBoard) g
 
 			for j := 1; j < length; j++ {
 				if j < corte[0] {
-					j = mc.check(puntosHijo_C, puntosPadre2[j].MovVectValue, nuevoHijo2, j)
+					j = mc.check(puntosHijo_C, puntosPadre2[j].MovVectValue, &nuevoHijo2, j)
 				} else {
-					j = check(puntosHijo_C, puntosPadre1[j].MovVectValue, nuevoHijo2, j)
+					j = mc.check(puntosHijo_C, puntosPadre1[j].MovVectValue, &nuevoHijo2, j)
 				}
 			}
 		} else if board.Params.CrossOverOp == 1 {
 			for j := 1; j < length; j++ {
 				if j < corte[0] {
-					j = mc.check(puntosHijo_C, puntosPadre1[j].MovVectValue, nuevoHijo1, j)
+					j = mc.check(puntosHijo_C, puntosPadre1[j].MovVectValue, &nuevoHijo1, j)
 				} else if j < corte[1] {
-					j = mc.check(puntosHijo_C, puntosPadre2[j].MovVectValue, nuevoHijo1, j)
+					j = mc.check(puntosHijo_C, puntosPadre2[j].MovVectValue, &nuevoHijo1, j)
 				} else {
-					j = mc.check(puntosHijo_C, puntosPadre1[j].MovVectValue, nuevoHijo1, j)
+					j = mc.check(puntosHijo_C, puntosPadre1[j].MovVectValue, &nuevoHijo1, j)
 				}
 			}
 
-			var puntosHijo_C []Point
+			var puntosHijo_C []c.Point
 
 			c2 := c.Point{
 				XValue:       0.0,
@@ -151,22 +158,22 @@ func (mc MakeCubeChildren) makeChildren(gen g.Generation, board *b.BlackBoard) g
 
 			for j := 1; j < length; j++ {
 				if j < corte[0] {
-					j = mc.check(puntosHijo_C, puntosPadre2[j].MovVectValue, nuevoHijo2, j)
+					j = mc.check(puntosHijo_C, puntosPadre2[j].MovVectValue, &nuevoHijo2, j)
 				} else if j < corte[1] {
-					j = mc.check(puntosHijo_C, puntosPadre1[j].MovVectValue, nuevoHijo2, j)
+					j = mc.check(puntosHijo_C, puntosPadre1[j].MovVectValue, &nuevoHijo2, j)
 				} else {
-					j = mc.check(puntosHijo_C, puntosPadre2[j].MovVectValue, nuevoHijo2, j)
+					j = mc.check(puntosHijo_C, puntosPadre2[j].MovVectValue, &nuevoHijo2, j)
 				}
 			}
 		} else if board.Params.CrossOverOp == 2 {
 			for j := 1; j < length; j++ {
 				if corte[j] == 0 {
-					j = mc.check(puntosHijo_C, puntosPadre1[j].MovVectValue, nuevoHijo1, j)
+					j = mc.check(puntosHijo_C, puntosPadre1[j].MovVectValue, &nuevoHijo1, j)
 				} else {
-					j = mc.check(puntosHijo_C, puntosPadre2[j].MovVectValue, nuevoHijo1, j)
+					j = mc.check(puntosHijo_C, puntosPadre2[j].MovVectValue, &nuevoHijo1, j)
 				}
 			}
-			var puntosHijo_C []Point
+			var puntosHijo_C []c.Point
 
 			c2 := c.Point{
 				XValue:       0.0,
@@ -185,18 +192,27 @@ func (mc MakeCubeChildren) makeChildren(gen g.Generation, board *b.BlackBoard) g
 
 			for j := 1; j < length; j++ {
 				if corte[j] == 0 {
-					j = mc.check(puntosHijo_C, puntosPadre2[j].MovVectValue, nuevoHijo2, j)
+					j = mc.check(puntosHijo_C, puntosPadre2[j].MovVectValue, &nuevoHijo2, j)
 				} else {
-					j = mc.check(puntosHijo_C, puntosPadre1[j].MovVectValue, nuevoHijo2, j)
+					j = mc.check(puntosHijo_C, puntosPadre1[j].MovVectValue, &nuevoHijo2, j)
 				}
 			}
 		}
-		hijo1 := c.NewConformation(nuevoHijo1)
-		hijo1.Parents = tempP
+
+		hijo1 := c.Conformation{
+			Conformations: nuevoHijo1,
+			Fitness:       f.NewFitness(nuevoHijo1).GetFitness(),
+			Parents:       tempP,
+		}
+		hijo1.Init()
 		conf = append(conf, hijo1)
 
-		hijo2 := c.NewConformation(nuevoHijo2)
-		hijo2.Parents = tempP
+		hijo2 := c.Conformation{
+			Conformations: nuevoHijo2,
+			Fitness:       f.NewFitness(nuevoHijo2).GetFitness(),
+			Parents:       tempP,
+		}
+		hijo2.Init()
 		conf = append(conf, hijo2)
 	}
 
@@ -205,7 +221,7 @@ func (mc MakeCubeChildren) makeChildren(gen g.Generation, board *b.BlackBoard) g
 	}
 	board.Bests = board.Bests[:0]
 
-	rGn := gn.Generation{
+	rGn := b.Generation{
 		Conformations: conf,
 		DmaxP:         board.GenDmaxP(conf),
 		RadioGiroP:    board.GenRadioGiroP(conf),
@@ -213,18 +229,18 @@ func (mc MakeCubeChildren) makeChildren(gen g.Generation, board *b.BlackBoard) g
 	return rGn
 }
 
-func (mc MakeCubeChildren) check(pointsHijo_C []c.Point, v int, puntosHijo []c.Point, j int) int {
+func (mc MakeCubeChildren) check(pointsHijo_C []c.Point, v int, puntosHijo *[]c.Point, j int) int {
 
 	var isOk bool = true
 	var sb string = ""
 	for {
-		pto := mc.genPtoCubico(v, mc.board.Hplevel.HpString[j], puntosHijo[j-1])
+		pto := mc.genPtoCubico(v, mc.board.Hplevel.HpString[j], (*puntosHijo)[j-1])
 
 		switch rand.Intn(6) {
 		case 0:
-			if puntosHijo[j-1].Way0 &&
-				g.board.IsAvailable(puntosHijo, pointsHijo_C, pto.XValue, pto.YValue, pto.ZValue) {
-				puntosHijo = append(puntosHijo, pto)
+			if (*puntosHijo)[j-1].Way0 &&
+				mc.board.IsAvailable(puntosHijo, pointsHijo_C, pto.XValue, pto.YValue, pto.ZValue) {
+				*puntosHijo = append(*puntosHijo, pto)
 				isOk = true
 			} else {
 				isOk = false
@@ -233,9 +249,9 @@ func (mc MakeCubeChildren) check(pointsHijo_C []c.Point, v int, puntosHijo []c.P
 			break
 
 		case 1:
-			if puntosHijo[j-1].Way1 &&
-				g.board.IsAvailable(puntosHijo, pointsHijo_C, pto.XValue, pto.YValue, pto.ZValue) {
-				puntosHijo = append(puntosHijo, pto)
+			if (*puntosHijo)[j-1].Way1 &&
+				mc.board.IsAvailable(puntosHijo, pointsHijo_C, pto.XValue, pto.YValue, pto.ZValue) {
+				*puntosHijo = append(*puntosHijo, pto)
 				isOk = true
 			} else {
 				isOk = false
@@ -244,9 +260,9 @@ func (mc MakeCubeChildren) check(pointsHijo_C []c.Point, v int, puntosHijo []c.P
 			break
 		case 2:
 
-			if puntosHijo[j-1].Way2 &&
-				g.board.IsAvailable(puntosHijo, pointsHijo_C, pto.XValue, pto.YValue, pto.ZValue) {
-				puntosHijo = append(puntosHijo, pto)
+			if (*puntosHijo)[j-1].Way2 &&
+				mc.board.IsAvailable(puntosHijo, pointsHijo_C, pto.XValue, pto.YValue, pto.ZValue) {
+				*puntosHijo = append(*puntosHijo, pto)
 				isOk = true
 			} else {
 				isOk = false
@@ -255,9 +271,9 @@ func (mc MakeCubeChildren) check(pointsHijo_C []c.Point, v int, puntosHijo []c.P
 			break
 		case 3:
 
-			if puntosHijo[j-1].Way3 &&
-				g.board.IsAvailable(puntosHijo, pointsHijo_C, pto.XValue, pto.YValue, pto.ZValue) {
-				puntosHijo = append(puntosHijo, pto)
+			if (*puntosHijo)[j-1].Way3 &&
+				mc.board.IsAvailable(puntosHijo, pointsHijo_C, pto.XValue, pto.YValue, pto.ZValue) {
+				*puntosHijo = append(*puntosHijo, pto)
 				isOk = true
 			} else {
 				isOk = false
@@ -267,9 +283,9 @@ func (mc MakeCubeChildren) check(pointsHijo_C []c.Point, v int, puntosHijo []c.P
 
 		case 4:
 
-			if puntosHijo[j-1].Way4 &&
-				g.board.IsAvailable(puntosHijo, pointsHijo_C, pto.XValue, pto.YValue, pto.ZValue) {
-				puntosHijo = append(puntosHijo, pto)
+			if (*puntosHijo)[j-1].Way4 &&
+				mc.board.IsAvailable(puntosHijo, pointsHijo_C, pto.XValue, pto.YValue, pto.ZValue) {
+				*puntosHijo = append(*puntosHijo, pto)
 				isOk = true
 			} else {
 				isOk = false
@@ -278,9 +294,9 @@ func (mc MakeCubeChildren) check(pointsHijo_C []c.Point, v int, puntosHijo []c.P
 			break
 
 		case 5:
-			if puntosHijo[j-1].Way5 &&
-				g.board.IsAvailable(puntosHijo, pointsHijo_C, pto.XValue, pto.YValue, pto.ZValue) {
-				puntosHijo = append(puntosHijo, pto)
+			if (*puntosHijo)[j-1].Way5 &&
+				mc.board.IsAvailable(puntosHijo, pointsHijo_C, pto.XValue, pto.YValue, pto.ZValue) {
+				*puntosHijo = append(*puntosHijo, pto)
 				isOk = true
 			} else {
 				isOk = false
@@ -305,30 +321,30 @@ func (mc MakeCubeChildren) check(pointsHijo_C []c.Point, v int, puntosHijo []c.P
 
 			switch pto.MovVectValue {
 			case 0:
-				puntosHijo[j-1].Way0 = false
+				(*puntosHijo)[j-1].Way0 = false
 				break
 			case 1:
-				puntosHijo[j-1].Way1 = false
+				(*puntosHijo)[j-1].Way1 = false
 				break
 			case 2:
-				puntosHijo[j-1].Way2 = false
+				(*puntosHijo)[j-1].Way2 = false
 				break
 			case 3:
-				puntosHijo[j-1].Way3 = false
+				(*puntosHijo)[j-1].Way3 = false
 				break
 			case 4:
-				puntosHijo[j-1].Way4 = false
+				(*puntosHijo)[j-1].Way4 = false
 				break
 			case 5:
-				puntosHijo[j-1].Way5 = false
+				(*puntosHijo)[j-1].Way5 = false
 				break
 			default:
 				fmt.Println("GenCubePoints")
 				break
 			}
 
-			pointsHijo_C = append(pointsHijo_C, puntosHijo[j])
-			puntosHijo = append(puntosHijo[:j-1], puntosHijo[j:]...)
+			pointsHijo_C = append(pointsHijo_C, (*puntosHijo)[j-1])
+			*puntosHijo = append((*puntosHijo)[:j-2], (*puntosHijo)[j-1:]...)
 			sb = ""
 			j--
 		}
@@ -338,10 +354,11 @@ func (mc MakeCubeChildren) check(pointsHijo_C []c.Point, v int, puntosHijo []c.P
 		}
 
 	}
+
 	return j
 }
 
-func (g *GenCubePoints) genPtoCubico(vectMov int, l byte, ptoAnterior c.Point) c.Point {
+func (mc MakeCubeChildren) genPtoCubico(vectMov int, l byte, ptoAnterior c.Point) c.Point {
 	p := c.Point{
 		XValue:       0.0,
 		YValue:       0.0,

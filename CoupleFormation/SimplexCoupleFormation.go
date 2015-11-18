@@ -4,14 +4,12 @@ import (
 	_ "fmt"
 	b "github.com/martinre2/Evolution/Board"
 	c "github.com/martinre2/Evolution/Conformation"
-	g "github.com/martinre2/Evolution/Generation"
 	"math/rand"
 )
 
 type SimplexCoupleFormation struct{}
 
-func (r SimplexCoupleFormation) CoupleFormation(generation g.Generation, board *b.BlackBoard) {
-
+func (r SimplexCoupleFormation) CoupleFormation(generation *b.Generation, board *b.BlackBoard) {
 	selRuleta := generation.Selection
 	var padres []c.Parents
 	var part2 []int
@@ -48,5 +46,7 @@ func (r SimplexCoupleFormation) CoupleFormation(generation g.Generation, board *
 			part2 = append(part2[:rdm], part2[rdm+1:]...)
 		}
 	}
-	generation.ParentsLst = padres
+	generation.ParentsLst = make([]c.Parents, len(padres))
+	copy(generation.ParentsLst, padres)
+
 }
