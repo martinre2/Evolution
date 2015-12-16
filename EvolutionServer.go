@@ -33,8 +33,14 @@ func main() {
 		c, _ := strconv.Atoi(r.FormValue("numberconf"))
 		run, _ := strconv.Atoi(r.FormValue("run"))
 		pcx, _ := strconv.ParseFloat(r.FormValue("crossprob"), 32)
+		experiments, _ := strconv.Atoi(r.FormValue("manyexp"))
 
 		fmt.Println("Params", l, c, run)
+
+		var bestBoard *b.BlackBoard
+		var board *b.BlackBoard
+		//var ex_randomStage s.RandomGenerationStage
+		//var ex_simpleStage s.SimpleGenerationStage
 
 		params := b.BlackBoardParameters{
 			LatticeType:      l,
@@ -45,21 +51,45 @@ func main() {
 			CrossOverProb:    float32(pcx),
 		}
 
-		board := b.NewBoard(params)
-		board.Hplevel.HpString = r.FormValue("hpseq")
+		bestBoard = b.NewBoard(params)
 
-		ex_randomStage := new(s.RandomGenerationStage).Execute(board)
-		ex_simpleStage := new(s.SimpleGenerationStage).Execute(board)
+		for i := 0; i < experiments; i++ {
+			board := b.NewBoard(params)
+			board.Hplevel.HpString = r.FormValue("hpseq")
 
+			ex_randomStage := new(s.RandomGenerationStage).Execute(board)
+			ex_simpleStage := new(s.SimpleGenerationStage).Execute(board)
+
+			_ = ex_randomStage
+			_ = ex_simpleStage
+
+			var bestFit int = 0
+
+			for _, c := range board.Generations[len(board.Generations)-1].Conformations {
+
+				if c.Fitness < bestFit {
+					bestFit = c.Fitness
+				}
+			}
+
+			board.BestFitness = bestFit
+
+			if board.BestFitness < bestBoard.BestFitness {
+				bestBoard = board
+			}
+		}
+
+		for i := 0; i < experiments; i++ {
+			fmt.Println(">>>i", i)
+		}
+		_ = bestBoard
 		_ = board
-		_ = ex_randomStage
-		_ = ex_simpleStage
 
 		fmt.Println("<End Simulation")
 
 		var export []*ExportConf
 
-		for _, c := range board.Generations[len(board.Generations)-1].Conformations {
+		for _, c := range bestBoard.Generations[len(bestBoard.Generations)-1].Conformations {
 			//for _, c := range board.Generations[0].Conformations {
 			e := new(ExportConf)
 			e.Fitness = c.Fitness

@@ -33,6 +33,7 @@ type BlackBoard struct {
 	Hplevel     HPLevel
 	Generations []Generation
 	Bests       []c.Conformation
+	BestFitness int
 }
 
 func NewBoard(parameters BlackBoardParameters) *BlackBoard {
