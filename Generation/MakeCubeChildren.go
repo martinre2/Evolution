@@ -30,10 +30,13 @@ func (mc MakeCubeChildren) MakeChildren(gen b.Generation, board *b.BlackBoard) b
 		var tempP c.Parents
 
 		if board.Params.CrossOverOp == 0 {
+			fmt.Println("OnePoint")
 			corte = cOver.OnePointCrossOver(length)
 		} else if board.Params.CrossOverOp == 1 {
+			fmt.Println("twoPoint")
 			corte = cOver.TwoPointCrossOver(length)
 		} else if board.Params.CrossOverOp == 2 {
+			fmt.Println("UniformPoint")
 			corte = cOver.UniformPointCrossOver(length)
 		}
 		var padre1 int = 0
@@ -44,13 +47,16 @@ func (mc MakeCubeChildren) MakeChildren(gen b.Generation, board *b.BlackBoard) b
 			padre2 = gen.ParentsLst[i].Parent2
 			tempP = gen.ParentsLst[i]
 		} else {
+			fmt.Println("Mutation OP !=0")
 			switch rand.Intn(2) {
 			case 0:
+				fmt.Println("MUT 0")
 				padre1 = gen.ParentsLst[i].Parent1
 				padre2 = gen.ParentsLst[i].Parent2
 				tempP = gen.ParentsLst[i]
 				break
 			case 1:
+				fmt.Println("MUT 1")
 				padre1 = gen.ParentsLst[i].Parent2
 				padre2 = gen.ParentsLst[i].Parent1
 				tempP.Parent1 = padre1

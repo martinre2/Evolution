@@ -29,6 +29,7 @@ func (c *CrossOver) OnePointCrossOver(longi int) []int {
 
 func (c *CrossOver) TwoPointCrossOver(longi int) []int {
 	var corte []int
+	corte = make([]int, 2)
 	if c.board.Params.CrossOverProb > rand.Float32() {
 		corte[0] = rand.Intn(longi / 2)
 		corte[1] = rand.Intn(longi/2) + (longi / 2)

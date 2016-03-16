@@ -36,6 +36,8 @@ func (r Roulette) Roulette(generation *b.Generation, board *b.BlackBoard) bool {
 
 		sort.Sort(dest)
 		//fmt.Println("____>>dest", dest[0])
+		fmt.Println("____>>dest0", dest[0])
+		fmt.Println("____>>dest1", dest[1])
 		board.AddBest(dest[0])
 		board.AddBest(dest[1])
 
@@ -59,6 +61,8 @@ func (r Roulette) Roulette(generation *b.Generation, board *b.BlackBoard) bool {
 				}
 			}
 		}
+
+		fmt.Println("____>>SElECT", seleccion)
 	} else if board.Params.OtherTechs[0] == 2 {
 		/*ArrayList<Conformation> dest = (ArrayList<Conformation>) generation.getConformations().clone();
 		board.Params.ordenar(dest);
@@ -100,6 +104,7 @@ func (r Roulette) Roulette(generation *b.Generation, board *b.BlackBoard) bool {
 	sort.Ints(seleccion)
 	generation.Selection = make([]int, len(seleccion))
 	copy(generation.Selection, seleccion)
+	fmt.Println("____>>SELECTION", generation.Selection)
 	return false
 }
 

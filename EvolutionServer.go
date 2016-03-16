@@ -43,6 +43,8 @@ func main() {
 			NumExperiments:   1,
 			OtherTechs:       []int{1, 0, 0},
 			CrossOverProb:    float32(pcx),
+			CrossOverOp:      1,
+			MutationOp:       1,
 		}
 
 		board := b.NewBoard(params)
