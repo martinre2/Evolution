@@ -22,6 +22,22 @@ type ExportConf struct {
 	Proteins  []*Points `json:"proteins"`
 }
 
+type Charts struct {
+	Sum        []int     `json:"sum"`
+	Average    []float32 `json:"average"`
+	Best       []int     `json:"best"`
+	Worts      []int     `json:"worts"`
+	Gene       []int     `json:"gene"`
+	RadioGiroP []float64 `json:"radioGiroP"`
+	DmaxP      []float64 `json:"dMaxP"`
+}
+
+type ExportResponse struct {
+	ConfPlot    []*ExportConf  `json:"confplot"`
+	Generations []b.Generation `json:"generations"`
+	Chart       Charts         `json:"charts"`
+}
+
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -90,6 +106,7 @@ func main() {
 		fmt.Println("<End Simulation")
 
 		var export []*ExportConf
+		var rs ExportResponse
 
 		for _, c := range bestBoard.Generations[len(bestBoard.Generations)-1].Conformations {
 			//for _, c := range board.Generations[0].Conformations {
@@ -107,9 +124,71 @@ func main() {
 			export = append(export, e)
 		}
 
+		//Stuff for charts
+		var ch Charts
+		//Fitness Chart
+		//Build Series
+		sum := make([]int, len(bestBoard.Generations))
+		average := make([]float32, len(bestBoard.Generations))
+		best := make([]int, len(bestBoard.Generations))
+		worts := make([]int, len(bestBoard.Generations))
+		gene := make([]int, len(bestBoard.Generations))
+
+		//Best
+		for i, g := range bestBoard.Generations {
+			gene[i] = i
+			totalFit, totalBestFit, totalWortsFit := 0, 0, -100
+
+			for _, c := range g.Conformations {
+				totalFit += c.Fitness
+
+				//totalBestFit = (totalBestFit > c.Fitness) ? (c.Fitness) : (totalBestFit)
+				if totalBestFit > c.Fitness {
+					totalBestFit = c.Fitness
+				} else {
+					totalBestFit = totalBestFit
+				}
+				//totalWortsFit = (totalWortsFit < c.Fitness) ? (c.Fitness) : (totalWortsFit)
+				if totalWortsFit < c.Fitness {
+					totalWortsFit = c.Fitness
+				} else {
+					totalWortsFit = totalWortsFit
+				}
+			}
+			sum[i] = totalFit
+			average[i] = float32(totalFit) / float32(len(g.Conformations))
+			best[i] = totalBestFit
+			worts[i] = totalWortsFit
+
+		}
+
+		//Radio Chart
+		//Build Series
+		radgiroP := make([]float64, len(bestBoard.Generations))
+		dmaxP := make([]float64, len(bestBoard.Generations))
+
+		for i, g := range bestBoard.Generations {
+			radgiroP[i] = g.RadioGiroP
+			dmaxP[i] = g.DmaxP
+		}
+		//end radio chart
+
+		ch.Sum = sum
+		ch.Average = average
+		ch.Best = best
+		ch.Worts = worts
+		ch.Gene = gene
+		ch.RadioGiroP = radgiroP
+		ch.DmaxP = dmaxP
+
 		fmt.Println(export)
 
-		js, err := json.Marshal(export)
+		rs.ConfPlot = export
+		//rs.Generations = bestBoard.Generations
+		rs.Chart = ch
+
+		//js, err := json.Marshal(export)
+		js, err := json.Marshal(rs)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

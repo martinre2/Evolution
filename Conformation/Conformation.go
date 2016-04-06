@@ -35,9 +35,12 @@ func (c *Conformation) genRadGirCM() {
 		rmeanY += p.YValue
 		rmeanZ += p.ZValue
 	}
-	rmeanX /= rmeanX / float32(len(c.Conformations))
-	rmeanY /= rmeanY / float32(len(c.Conformations))
-	rmeanZ /= rmeanZ / float32(len(c.Conformations))
+
+	fmt.Println("CM>>", rmeanX, rmeanY, rmeanZ)
+
+	rmeanX = rmeanX / float32(len(c.Conformations))
+	rmeanY = rmeanY / float32(len(c.Conformations))
+	rmeanZ = rmeanZ / float32(len(c.Conformations))
 
 	var tempX, tempY, tempZ float64 = 0, 0, 0
 	for _, p := range c.Conformations {
@@ -78,6 +81,7 @@ func (c *Conformation) genDmax() {
 			}
 		}
 	}
+	c.Dmax = Dmax
 }
 
 type Conformations []Conformation
