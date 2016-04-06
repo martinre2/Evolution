@@ -36,8 +36,6 @@ func (c *Conformation) genRadGirCM() {
 		rmeanZ += p.ZValue
 	}
 
-	fmt.Println("CM>>", rmeanX, rmeanY, rmeanZ)
-
 	rmeanX = rmeanX / float32(len(c.Conformations))
 	rmeanY = rmeanY / float32(len(c.Conformations))
 	rmeanZ = rmeanZ / float32(len(c.Conformations))
