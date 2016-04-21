@@ -23,13 +23,15 @@ type ExportConf struct {
 }
 
 type Charts struct {
-	Sum        []int     `json:"sum"`
-	Average    []float32 `json:"average"`
-	Best       []int     `json:"best"`
-	Worts      []int     `json:"worts"`
-	Gene       []int     `json:"gene"`
-	RadioGiroP []float64 `json:"radioGiroP"`
-	DmaxP      []float64 `json:"dMaxP"`
+	Sum          []int     `json:"sum"`
+	Average      []float32 `json:"average"`
+	Best         []int     `json:"best"`
+	Worts        []int     `json:"worts"`
+	Gene         []int     `json:"gene"`
+	RadioGiroP   []float64 `json:"radioGiroP"`
+	DmaxP        []float64 `json:"dMaxP"`
+	Conformation []int     `json:"conformation"`
+	Fitness      []int     `json:"fitness"`
 }
 
 type ExportResponse struct {
@@ -50,6 +52,7 @@ func main() {
 		run, _ := strconv.Atoi(r.FormValue("run"))
 		pcx, _ := strconv.ParseFloat(r.FormValue("crossprob"), 32)
 		experiments, _ := strconv.Atoi(r.FormValue("manyexp"))
+		crossop, _ := strconv.Atoi(r.FormValue("crossover"))
 
 		fmt.Println("Params", l, c, run)
 
@@ -65,7 +68,7 @@ func main() {
 			NumExperiments:   1,
 			OtherTechs:       []int{1, 0, 0},
 			CrossOverProb:    float32(pcx),
-			CrossOverOp:      1,
+			CrossOverOp:      crossop,
 			MutationOp:       1,
 		}
 
@@ -173,6 +176,17 @@ func main() {
 		}
 		//end radio chart
 
+		//Conformation Fitness
+		//Build Serie
+		conf := make([]int, len(bestBoard.Generations[len(bestBoard.Generations)-1].Conformations))
+		fitness := make([]int, len(bestBoard.Generations[len(bestBoard.Generations)-1].Conformations))
+
+		for i, c := range bestBoard.Generations[len(bestBoard.Generations)-1].Conformations {
+			conf[i] = i + 1
+			fitness[i] = c.Fitness
+		}
+		//end chart
+
 		ch.Sum = sum
 		ch.Average = average
 		ch.Best = best
@@ -180,6 +194,8 @@ func main() {
 		ch.Gene = gene
 		ch.RadioGiroP = radgiroP
 		ch.DmaxP = dmaxP
+		ch.Fitness = fitness
+		ch.Conformation = conf
 
 		fmt.Println(export)
 
@@ -201,6 +217,6 @@ func main() {
 		//fmt.Println("___>Peticion")
 	})
 
-	log.Fatal(http.ListenAndServe(":8081", nil))
+	log.Fatal(http.ListenAndServe(":4005", nil))
 
 }
